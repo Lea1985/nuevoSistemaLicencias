@@ -1,4 +1,4 @@
-# Sistema de Gestión Institucional – Arquitectura v1
+# Sistema de Gestión Institucional – Arquitectura v2
 
 ## 1. Propósito
 
@@ -11,6 +11,7 @@ Definir el modelo de dominio base para la gestión de:
 - Horarios
 - Ausencias
 - Reemplazos
+- Artículos/licencias
 
 Esta arquitectura constituye la base de la versión 2 del sistema.
 
@@ -39,7 +40,16 @@ Puede:
 - Tener múltiples cargos.
 - Trabajar en distintos turnos.
 - Trabajar en primaria y secundaria.
-- Ser tener un cargo de jornada completa y también modulos horadios asignados.
+- Tener un cargo de jornada completa y también módulos horarios asignados.
+
+**Atributos agregados:**
+
+- nombre, apellido
+- domicilio
+- teléfono
+- mail personal y laboral
+- DNI
+- situación de revista
 
 ---
 
@@ -47,19 +57,37 @@ Puede:
 
 Unidad institucional.
 
+**Atributos agregados:**
+
+- idEscuela
+- nombreEscuela
+- dirección
+- teléfono
+
 ---
 
 ### Curso
 
 Ej: 1°, 2°, 3°.
 
+**Atributos agregados:**
+
+- idCurso
+- nombreCurso
+- nivel (Primaria/Secundaria)
+
 ---
 
 ### Comisión
 
-División de un curso (Ej: 1° A, 1° B).
-
+División de un curso (Ej: 1° A, 1° B).  
 Un Curso puede tener varias Comisiones.
+
+**Atributos agregados:**
+
+- idComision
+- nombreComision
+- curso_id
 
 ---
 
@@ -67,7 +95,7 @@ Un Curso puede tener varias Comisiones.
 
 Unidad estructural otorgada por la provincia.
 
-Atributos:
+**Atributos:**
 
 - id
 - sarh (único, inmutable)
@@ -76,21 +104,21 @@ Atributos:
 - estado (Activo / Inactivo)
 - persona_id
 - comision_id (nullable según tipo)
-
-Reglas:
-
-- Si cambia el SARH → nuevo Cargo.
-- No se modifica historial.
-- Puede estar asociado a comisión (docentes).
-- Cargos de jornada no docentes o profesores no requieren comisión.
+- idCurso (opcional)
+- nombreCargo (opcional, descriptivo)
 
 ---
 
 ### MóduloHorario
 
-Bloque de 40 minutos.
+Bloque de 40 minutos. Representa la grilla horaria institucional.
 
-Representa la grilla horaria institucional.
+**Atributos agregados:**
+
+- idModuloHorario
+- día
+- horaDesde
+- horaHasta
 
 ---
 
@@ -98,7 +126,7 @@ Representa la grilla horaria institucional.
 
 Tabla intermedia que distribuye las horas del Cargo en la semana.
 
-Campos:
+**Campos:**
 
 - cargo_id
 - modulo_horario_id
@@ -115,15 +143,35 @@ Reglas:
 
 Representa una licencia o inasistencia.
 
-Campos:
+**Campos:**
 
 - cargo_id
 - fecha_desde
 - fecha_hasta
-- artículo
+- artículo_id (referencia a Artículos)
 - reemplaza_ausencia_id (nullable)
+- observación (opcional)
+- idHorario (opcional)
+- idProfesor (opcional)
 
 Permite cadena de reemplazos.
+
+---
+
+### Artículo / Licencia
+
+Define tipos de licencia o artículo legal que aplica a una ausencia.
+
+**Campos:**
+
+- idArticulo
+- nombreArticulo
+- sueldo (opcional)
+- ingreso (fecha)
+- requisitos (texto)
+- cantDias
+- días (string o enum)
+- generaReemplazo
 
 ---
 
@@ -131,10 +179,32 @@ Permite cadena de reemplazos.
 
 Se modela implícitamente a través de:
 
-Nuevo Cargo temporal + Ausencia que referencia la anterior.
+- Nuevo Cargo temporal + Ausencia que referencia la anterior.
 
 Permite:
-Titular → Reemplazo → Reemplazo del reemplazo.
+
+- Titular → Reemplazo → Reemplazo del reemplazo.
+
+**Campos agregados:**
+
+- idReemplazo
+- idAusencia
+- idProfesor
+- fechaDesde
+- fechaHasta
+
+---
+
+### Historico / Registro de cambios
+
+- Mantiene trazabilidad de cambios de horarios y cargos.
+- Registra estado y fecha de vigencia de cada modificación.
+
+**Campos agregados:**
+
+- idHistorico
+- horario (texto o JSON que represente distribución horaria)
+- fechaVigencia
 
 ---
 
@@ -165,6 +235,7 @@ Titular → Reemplazo → Reemplazo del reemplazo.
 - Distribución semanal de un cargo.
 - Cargos activos por escuela.
 - Validación de superposición horaria.
+- Licencias por artículo.
 
 ---
 
