@@ -1,5 +1,3 @@
-# Diagrama de Flujo – Alta de Ausencia
-
 Inicio
 ↓
 Secretaría carga ausencia
@@ -8,22 +6,27 @@ Secretaría carga ausencia
 ├─ No → Error
 └─ Sí →
 ↓
-Validar fechas
+Validar fechas ausencia
 ↓
-¿Superposición con otra ausencia?
+¿Superposición con otra ausencia del titular?
 ├─ Sí → Error
 └─ No →
-↓
-Consultar Artículo
+Consultar Artículo Normativo
 ↓
 ¿Genera reemplazo?
 ├─ No → Guardar ausencia → Fin
 └─ Sí →
 ↓
-Crear nueva Ausencia
+Validar disponibilidad del docente reemplazante (Persona)
+├─ No → Error
+└─ Sí →
 ↓
-Asignar docente reemplazante
+Crear Designación temporal del reemplazo
 ↓
-Crear Cargo temporal
+Asignar módulos del Cargo según CargoModuloHorario
+↓
+Crear Ausencia del reemplazo (reemplaza_ausencia_id apunta al titular)
+↓
+Guardar Ausencia del titular
 ↓
 Fin
